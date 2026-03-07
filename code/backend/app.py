@@ -24,7 +24,7 @@ openai_client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql+mysqlconnector://root:ved%40123@localhost/studymap')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql+mysqlconnector://root:root123@localhost/studymap')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'jwt-secret-key-change-in-production'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=30)
@@ -153,21 +153,34 @@ class Topic(db.Model):
     __tablename__ = 'topics'
     id = db.Column('topic_id', db.Integer, primary_key=True)
     subject_id = db.Column(db.Integer, db.ForeignKey('subjects.subject_id'), nullable=False)
+    # parent_topic_id links a subtopic row back to its parent topic header.
+    # NULL  → this row IS a topic heading (or a flat topic from PDF extraction).
+    # non-NULL → this row IS a subtopic that can be tested.
+    parent_topic_id = db.Column(db.Integer, db.ForeignKey('topics.topic_id'), nullable=True)
     name = db.Column(db.String(255), nullable=False)
     status = db.Column(db.String(20), default='pending')  # 'pending' or 'verified'
     score = db.Column(db.Integer)
     order_index = db.Column(db.Integer, default=0)
-    
+
     # Relationships
     questions = db.relationship('Question', backref='topic', lazy=True, cascade='all, delete-orphan')
     test_attempts = db.relationship('TestAttempt', backref='topic', lazy=True, cascade='all, delete-orphan')
+    # A topic heading may have child subtopics
+    subtopics = db.relationship(
+        'Topic',
+        backref=db.backref('parent_topic', remote_side='Topic.id'),
+        foreign_keys='Topic.parent_topic_id',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
 
     def to_dict(self):
         result = {
             'id': f't{self.id}',
             'name': self.name,
             'status': self.status,
-            'subject_id': f's{self.subject_id}'
+            'subject_id': f's{self.subject_id}',
+            'parent_topic_id': f't{self.parent_topic_id}' if self.parent_topic_id else None
         }
         if self.score is not None:
             result['score'] = self.score
@@ -931,6 +944,221 @@ def extract_syllabus():
         
     except Exception as e:
         db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+# ================================
+# MANUAL SYLLABUS ROUTES
+# ================================
+
+@app.route('/api/syllabus/manual', methods=['POST'])
+@jwt_required()
+def save_manual_syllabus():
+    """
+    Save a manually entered syllabus following the hierarchy:
+      Unit (Subject) -> Topic -> Subtopic
+
+    Expected JSON body:
+    {
+      "syllabusName": "My Course",
+      "units": [
+        {
+          "name": "Unit 1",
+          "topics": [
+            {
+              "name": "Introduction",
+              "subtopics": [
+                "Introduction to Python",
+                "Data Types in Python",
+                "Operators in Python"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    """
+    try:
+        user_id = int(get_jwt_identity())
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User session invalid. Please log out and log in again.'}), 401
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        # ── Validate syllabus name ──────────────────────────────────────────
+        syllabus_name = (data.get('syllabusName') or '').strip()
+        if not syllabus_name:
+            return jsonify({'error': 'Syllabus name is required'}), 400
+
+        units_data = data.get('units', [])
+        if not units_data:
+            return jsonify({'error': 'At least one unit with a topic is required'}), 400
+
+        # ── Create the Syllabus record (no PDF path for manual entry) ───────
+        syllabus = Syllabus(
+            user_id=user_id,
+            name=syllabus_name,
+            filename=None,
+            filepath=None,
+            extracted=True      # Mark as already processed
+        )
+        db.session.add(syllabus)
+        db.session.flush()      # Assign syllabus.id
+
+        # ── Helper: create a testable subtopic row ──────────────────────────
+        def create_subtopic_row(subtopic_name, subject_id, parent_topic_id, order_index):
+            """Creates a Topic row with parent_topic_id set (= a proper subtopic)."""
+            subtopic = Topic(
+                subject_id=subject_id,
+                parent_topic_id=parent_topic_id,
+                name=subtopic_name,
+                status='pending',
+                order_index=order_index
+            )
+            db.session.add(subtopic)
+            db.session.flush()  # Assign subtopic.id
+
+            # Auto-generate 5 MCQ questions for this subtopic
+            questions = generate_questions(subtopic_name, 5)
+            for q_data in questions:
+                db.session.add(Question(
+                    topic_id=subtopic.id,
+                    question=q_data['question'],
+                    options=json.dumps(q_data['options']),
+                    correct_answer=q_data['correct_answer']
+                ))
+            return subtopic
+
+        # ── Persist units → topics → subtopics ─────────────────────────────
+        for u_idx, unit_data in enumerate(units_data):
+            unit_name = (unit_data.get('name') or '').strip()
+            if not unit_name:
+                return jsonify({'error': f'Unit name cannot be empty (index {u_idx})'}), 400
+
+            # Each Unit maps to a Subject row
+            subject = Subject(
+                syllabus_id=syllabus.id,
+                name=unit_name,
+                order_index=u_idx
+            )
+            db.session.add(subject)
+            db.session.flush()  # Assign subject.id
+
+            topics_data = unit_data.get('topics', [])
+            for t_idx, topic_data in enumerate(topics_data):
+                topic_name = (topic_data.get('name') or '').strip()
+                if not topic_name:
+                    return jsonify({'error': f'Topic name cannot be empty (unit: {unit_name})'}), 400
+
+                subtopics = topic_data.get('subtopics', [])
+                if not subtopics:
+                    return jsonify({'error': f'Topic "{topic_name}" must have at least one subtopic'}), 400
+
+                # Create the Topic heading row (parent_topic_id = NULL, not testable)
+                topic_row = Topic(
+                    subject_id=subject.id,
+                    parent_topic_id=None,
+                    name=topic_name,
+                    status='pending',
+                    order_index=t_idx
+                )
+                db.session.add(topic_row)
+                db.session.flush()  # Assign topic_row.id
+
+                # Create each subtopic as a child Topic row
+                for st_idx, st_name in enumerate(subtopics):
+                    st_name = st_name.strip()
+                    if not st_name:
+                        continue  # skip blank
+                    create_subtopic_row(
+                        subtopic_name=st_name,
+                        subject_id=subject.id,
+                        parent_topic_id=topic_row.id,
+                        order_index=st_idx
+                    )
+
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Manual syllabus saved successfully',
+            'syllabus': syllabus.to_dict(include_subjects=False)
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print(f'Manual syllabus save error: {str(e)}')
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/syllabus/manual/structure/<int:syllabus_id>', methods=['GET'])
+@jwt_required()
+def get_manual_syllabus_structure(syllabus_id):
+    """
+    Return the full Unit → Topic → Subtopic hierarchy for a manually-entered
+    syllabus in a format the front-end can render with "Start Test" buttons.
+    """
+    try:
+        user_id = int(get_jwt_identity())
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User session invalid.'}), 401
+
+        syllabus = Syllabus.query.filter_by(id=syllabus_id, user_id=user_id).first()
+        if not syllabus:
+            return jsonify({'error': 'Syllabus not found'}), 404
+
+        # Update last_accessed
+        syllabus.last_accessed = datetime.utcnow()
+        db.session.commit()
+
+        units = []
+        for subject in sorted(syllabus.subjects, key=lambda s: s.order_index):
+            # Topic headings: parent_topic_id is NULL
+            topic_headings = Topic.query.filter_by(
+                subject_id=subject.id,
+                parent_topic_id=None
+            ).order_by(Topic.order_index).all()
+
+            topics_out = []
+            for th in topic_headings:
+                # Children: subtopics whose parent_topic_id == th.id
+                subs = Topic.query.filter_by(
+                    parent_topic_id=th.id
+                ).order_by(Topic.order_index).all()
+
+                subtopics_out = []
+                for st in subs:
+                    subtopics_out.append({
+                        'id': f't{st.id}',
+                        'name': st.name,
+                        'status': st.status,
+                        'score': st.score
+                    })
+
+                topics_out.append({
+                    'id': f't{th.id}',
+                    'name': th.name,
+                    'subtopics': subtopics_out
+                })
+
+            units.append({
+                'id': f's{subject.id}',
+                'name': subject.name,
+                'topics': topics_out
+            })
+
+        return jsonify({
+            'syllabus': {
+                'id': syllabus.id,
+                'name': syllabus.name
+            },
+            'units': units
+        }), 200
+
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 

@@ -118,109 +118,244 @@
         <main class="main-content">
             <div id="context-banner-container"></div>
             <div class="upload-container">
+
+                <!-- Page Header -->
                 <div class="upload-header animate-slide-up">
                     <h1>Upload Your Syllabus</h1>
-                    <p>Upload your curriculum PDF and we'll extract subjects and topics for you</p>
+                    <p>Upload a PDF or manually enter your syllabus — Unit by Unit</p>
                 </div>
 
-                <div class="glass-card upload-zone animate-slide-up delay-1" id="upload-zone">
-                    <div class="upload-zone-content" id="upload-zone-content">
-                        <div class="upload-zone-icon">
-                            <svg class="icon">
-                                <use href="../assets/icons.svg#upload"></use>
-                            </svg>
-                        </div>
-                        <p class="upload-zone-text">Drag & drop your PDF here</p>
-                        <p class="upload-zone-subtext">or click to browse</p>
-                        <button class="btn btn-outline" id="browse-btn">Browse Files</button>
-                        <input type="file" accept=".pdf" class="upload-file-input" id="file-input">
-                    </div>
+                <!-- =====================================================
+                     TAB SWITCHER
+                ====================================================== -->
+                <div class="upload-tabs animate-slide-up delay-1">
+                    <button class="upload-tab active" id="tab-pdf" aria-selected="true">
+                        <svg class="icon" style="width:1rem;height:1rem;">
+                            <use href="../assets/icons.svg#upload"></use>
+                        </svg>
+                        Upload PDF Syllabus
+                    </button>
+                    <button class="upload-tab" id="tab-manual" aria-selected="false">
+                        <svg class="icon" style="width:1rem;height:1rem;">
+                            <use href="../assets/icons.svg#book-open"></use>
+                        </svg>
+                        Enter Syllabus Manually
+                    </button>
+                </div>
 
-                    <!-- File Preview (hidden by default) -->
-                    <div id="file-preview" class="hidden" style="padding: 1.5rem;">
-                        <div class="upload-file-preview">
-                            <div class="upload-file-icon">
+                <!-- =====================================================
+                     PANEL 1 — PDF UPLOAD  (original, untouched)
+                ====================================================== -->
+                <div id="panel-pdf">
+                    <div class="glass-card upload-zone animate-slide-up delay-2" id="upload-zone">
+                        <div class="upload-zone-content" id="upload-zone-content">
+                            <div class="upload-zone-icon">
                                 <svg class="icon">
-                                    <use href="../assets/icons.svg#file-text"></use>
+                                    <use href="../assets/icons.svg#upload"></use>
                                 </svg>
                             </div>
-                            <div class="upload-file-info">
-                                <p class="upload-file-name" id="file-name"></p>
-                                <p class="upload-file-size" id="file-size"></p>
+                            <p class="upload-zone-text">Drag &amp; drop your PDF here</p>
+                            <p class="upload-zone-subtext">or click to browse</p>
+                            <button class="btn btn-outline" id="browse-btn">Browse Files</button>
+                            <input type="file" accept=".pdf" class="upload-file-input" id="file-input">
+                        </div>
+
+                        <!-- File Preview (hidden by default) -->
+                        <div id="file-preview" class="hidden" style="padding: 1.5rem;">
+                            <div class="upload-file-preview">
+                                <div class="upload-file-icon">
+                                    <svg class="icon">
+                                        <use href="../assets/icons.svg#file-text"></use>
+                                    </svg>
+                                </div>
+                                <div class="upload-file-info">
+                                    <p class="upload-file-name" id="file-name"></p>
+                                    <p class="upload-file-size" id="file-size"></p>
+                                </div>
+                                <button class="btn btn-ghost btn-icon" id="remove-file">
+                                    <svg class="icon">
+                                        <use href="../assets/icons.svg#x"></use>
+                                    </svg>
+                                </button>
                             </div>
-                            <button class="btn btn-ghost btn-icon" id="remove-file">
+
+                            <div class="upload-progress hidden" id="upload-progress">
+                                <div class="upload-progress-header">
+                                    <span class="upload-progress-status" id="upload-status">Uploading...</span>
+                                    <span class="upload-progress-percentage" id="upload-percentage">0%</span>
+                                </div>
+                                <div class="progress-bar" style="height: 0.5rem;">
+                                    <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-gradient btn-lg" style="width: 100%; margin-top: 1rem;"
+                                id="upload-btn">
                                 <svg class="icon">
-                                    <use href="../assets/icons.svg#x"></use>
+                                    <use href="../assets/icons.svg#upload"></use>
                                 </svg>
+                                Upload PDF
                             </button>
                         </div>
+                    </div>
 
-                        <div class="upload-progress hidden" id="upload-progress">
-                            <div class="upload-progress-header">
-                                <span class="upload-progress-status" id="upload-status">Uploading...</span>
-                                <span class="upload-progress-percentage" id="upload-percentage">0%</span>
-                            </div>
-                            <div class="progress-bar" style="height: 0.5rem;">
-                                <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+                    <div class="upload-info-grid animate-slide-up delay-2">
+                        <div class="glass-card upload-info-card">
+                            <div class="upload-info-content">
+                                <div class="upload-info-icon primary">
+                                    <svg class="icon">
+                                        <use href="../assets/icons.svg#file-text"></use>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="upload-info-title">Supported Format</h3>
+                                    <p class="upload-info-text">PDF files only. Max file size: 10MB</p>
+                                </div>
                             </div>
                         </div>
-
-                        <button class="btn btn-gradient btn-lg" style="width: 100%; margin-top: 1rem;" id="upload-btn">
-                            <svg class="icon">
-                                <use href="../assets/icons.svg#upload"></use>
-                            </svg>
-                            Upload PDF
-                        </button>
+                        <div class="glass-card upload-info-card">
+                            <div class="upload-info-content">
+                                <div class="upload-info-icon success">
+                                    <svg class="icon">
+                                        <use href="../assets/icons.svg#check-circle"></use>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="upload-info-title">Auto Extraction</h3>
+                                    <p class="upload-info-text">We'll automatically extract subjects and topics</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="upload-info-grid animate-slide-up delay-2">
-                    <div class="glass-card upload-info-card">
+                    <div class="glass-card upload-tips animate-slide-up delay-3" style="padding: 1.25rem;">
                         <div class="upload-info-content">
-                            <div class="upload-info-icon primary">
+                            <div class="upload-info-icon warning">
                                 <svg class="icon">
-                                    <use href="../assets/icons.svg#file-text"></use>
+                                    <use href="../assets/icons.svg#alert-circle"></use>
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="upload-info-title">Supported Format</h3>
-                                <p class="upload-info-text">PDF files only. Max file size: 10MB</p>
+                                <h3 class="upload-info-title" style="margin-bottom: 0.5rem;">Tips for best results</h3>
+                                <ul>
+                                    <li>• Make sure your PDF has clear text (not just images)</li>
+                                    <li>• Structured syllabi with headings work best</li>
+                                    <li>• You can edit the extracted content after upload</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
-                    <div class="glass-card upload-info-card">
-                        <div class="upload-info-content">
-                            <div class="upload-info-icon success">
-                                <svg class="icon">
+                </div><!-- /panel-pdf -->
+
+                <!-- =====================================================
+                     PANEL 2 — MANUAL ENTRY
+                ====================================================== -->
+                <div id="panel-manual" class="hidden">
+
+                    <!-- ── Step 1: Syllabus Name ─────────────────── -->
+                    <div class="glass-card man-card animate-slide-up delay-2">
+                        <div class="man-card-header">
+                            <div class="man-icon-wrap primary">
+                                <svg class="icon" style="width:1rem;height:1rem;">
+                                    <use href="../assets/icons.svg#book-open"></use>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="man-title">Syllabus Name</h2>
+                                <p class="man-subtitle">Give your syllabus a recognisable title</p>
+                            </div>
+                        </div>
+                        <div class="man-field">
+                            <label class="man-label" for="inp-syllabus-name">
+                                Syllabus Name <span class="man-req">*</span>
+                            </label>
+                            <input class="man-input" id="inp-syllabus-name" type="text"
+                                placeholder="e.g. Computer Science – Semester 3" maxlength="200" autocomplete="off">
+                            <span class="man-err hidden" id="err-syllabus-name">Syllabus name cannot be empty.</span>
+                        </div>
+                    </div>
+
+                    <!-- ── Step 2: Add Subtopic Form ─────────────── -->
+                    <div class="glass-card man-card animate-slide-up delay-2">
+                        <div class="man-card-header">
+                            <div class="man-icon-wrap success">
+                                <svg class="icon" style="width:1rem;height:1rem;">
                                     <use href="../assets/icons.svg#check-circle"></use>
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="upload-info-title">Auto Extraction</h3>
-                                <p class="upload-info-text">We'll automatically extract subjects and topics</p>
+                                <h2 class="man-title">Add Subtopic</h2>
+                                <p class="man-subtitle">Enter a Unit → Topic → Subtopic and click <strong>Add
+                                        Subtopic</strong></p>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="glass-card upload-tips animate-slide-up delay-3" style="padding: 1.25rem;">
-                    <div class="upload-info-content">
-                        <div class="upload-info-icon warning">
-                            <svg class="icon">
-                                <use href="../assets/icons.svg#alert-circle"></use>
-                            </svg>
+                        <div class="man-fields-grid">
+                            <!-- Unit Name -->
+                            <div class="man-field">
+                                <label class="man-label" for="inp-unit">Unit Name <span class="man-req">*</span></label>
+                                <input class="man-input" id="inp-unit" type="text" placeholder="e.g. Unit 1"
+                                    maxlength="200" autocomplete="off">
+                                <span class="man-err hidden" id="err-unit">Unit name cannot be empty.</span>
+                            </div>
+                            <!-- Topic Name -->
+                            <div class="man-field">
+                                <label class="man-label" for="inp-topic">Topic Name <span
+                                        class="man-req">*</span></label>
+                                <input class="man-input" id="inp-topic" type="text" placeholder="e.g. Introduction"
+                                    maxlength="200" autocomplete="off">
+                                <span class="man-err hidden" id="err-topic">Topic name cannot be empty.</span>
+                            </div>
+                            <!-- Subtopic Name -->
+                            <div class="man-field">
+                                <label class="man-label" for="inp-subtopic">Subtopic Name <span
+                                        class="man-req">*</span></label>
+                                <input class="man-input" id="inp-subtopic" type="text"
+                                    placeholder="e.g. Data Types in Python" maxlength="200" autocomplete="off">
+                                <span class="man-err hidden" id="err-subtopic">Subtopic name cannot be empty.</span>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="upload-info-title" style="margin-bottom: 0.5rem;">Tips for best results</h3>
-                            <ul>
-                                <li>• Make sure your PDF has clear text (not just images)</li>
-                                <li>• Structured syllabi with headings work best</li>
-                                <li>• You can edit the extracted content after upload</li>
-                            </ul>
+
+                        <button class="btn btn-outline man-add-btn" id="btn-add-subtopic">
+                            <svg class="icon" style="width:1rem;height:1rem;">
+                                <use href="../assets/icons.svg#check-circle"></use>
+                            </svg>
+                            Add Subtopic
+                        </button>
+                    </div>
+
+                    <!-- ── Step 3: Live Preview Tree ─────────────── -->
+                    <div class="glass-card man-card animate-slide-up delay-3" id="preview-card" style="display:none;">
+                        <div class="man-card-header" style="margin-bottom:1rem;">
+                            <div class="man-icon-wrap warning">
+                                <svg class="icon" style="width:1rem;height:1rem;">
+                                    <use href="../assets/icons.svg#bar-chart"></use>
+                                </svg>
+                            </div>
+                            <div style="flex:1;">
+                                <h2 class="man-title">Syllabus Preview</h2>
+                                <p class="man-subtitle">Review your structure before saving</p>
+                            </div>
+                            <span class="man-badge" id="preview-badge">0 subtopics</span>
+                        </div>
+
+                        <!-- Tree rendered by JS -->
+                        <div class="man-tree" id="man-tree"></div>
+
+                        <!-- Save -->
+                        <div style="margin-top:1.5rem; display:flex; justify-content:flex-end;">
+                            <button class="btn btn-gradient btn-lg" id="btn-save-syllabus">
+                                <svg class="icon" style="width:1rem;height:1rem;">
+                                    <use href="../assets/icons.svg#upload"></use>
+                                </svg>
+                                Save Syllabus
+                            </button>
                         </div>
                     </div>
-                </div>
-            </div>
+
+                </div><!-- /panel-manual -->
+
+            </div><!-- /upload-container -->
         </main>
     </div>
 

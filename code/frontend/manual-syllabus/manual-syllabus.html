@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMap - My Syllabus</title>
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+    <link rel="stylesheet" href="../common/common.css">
+    <link rel="stylesheet" href="manual-syllabus.css">
+</head>
+
+<body>
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="auth-mobile-logo-icon"
+                style="width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; background: var(--gradient-primary); border-radius: 0.5rem; color: white;">
+                <svg class="icon">
+                    <use href="../assets/icons.svg#graduation-cap"></use>
+                </svg>
+            </div>
+            <span style="font-weight: 700;">StudyMap</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button class="theme-toggle-btn" id="header-theme-toggle-mobile">
+                <svg class="icon">
+                    <use href="../assets/icons.svg#moon"></use>
+                </svg>
+            </button>
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <svg class="icon">
+                    <use href="../assets/icons.svg#menu"></use>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
+                    <div class="sidebar-logo-icon">
+                        <svg class="icon">
+                            <use href="../assets/icons.svg#graduation-cap"></use>
+                        </svg>
+                    </div>
+                    <span class="sidebar-logo-text">StudyMap</span>
+                </div>
+                <button class="theme-toggle-btn desktop-only" id="header-theme-toggle">
+                    <svg class="icon">
+                        <use href="../assets/icons.svg#moon"></use>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="../dashboard/dashboard.html" class="sidebar-nav-item">
+                    <svg class="icon">
+                        <use href="../assets/icons.svg#home"></use>
+                    </svg><span>Dashboard</span>
+                </a>
+                <a href="../upload/upload.html" class="sidebar-nav-item">
+                    <svg class="icon">
+                        <use href="../assets/icons.svg#upload"></use>
+                    </svg><span>Upload PDF</span>
+                </a>
+                <a href="../syllabus/syllabus.html" class="sidebar-nav-item active">
+                    <svg class="icon">
+                        <use href="../assets/icons.svg#book-open"></use>
+                    </svg><span>Syllabus</span>
+                </a>
+                <a href="../streaks/streaks.html" class="sidebar-nav-item">
+                    <svg class="icon">
+                        <use href="../assets/icons.svg#flame"></use>
+                    </svg><span>Streaks</span>
+                </a>
+                <a href="../final-exam/final-exam.html" class="sidebar-nav-item">
+                    <svg class="icon">
+                        <use href="../assets/icons.svg#trophy"></use>
+                    </svg><span>Final Exam</span>
+                </a>
+                <a href="../analytics/analytics.html" class="sidebar-nav-item">
+                    <svg class="icon">
+                        <use href="../assets/icons.svg#bar-chart"></use>
+                    </svg><span>Analytics</span>
+                </a>
+                <a href="../settings/settings.html" class="sidebar-nav-item">
+                    <svg class="icon">
+                        <use href="../assets/icons.svg#settings"></use>
+                    </svg><span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-user-avatar">U</div>
+                    <div class="sidebar-user-info">
+                        <div class="sidebar-user-name">User Name</div>
+                        <div class="sidebar-user-email">user@example.com</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="context-banner-container"></div>
+            <div class="ms-container">
+
+                <!-- Header -->
+                <div class="ms-header animate-slide-up">
+                    <div>
+                        <h1 id="ms-title">My Syllabus</h1>
+                        <p class="ms-subtitle" id="ms-subtitle">Loading your syllabus…</p>
+                    </div>
+                    <a href="../upload/upload.html" class="btn btn-outline ms-back-btn">
+                        <svg class="icon" style="width:1rem;height:1rem;">
+                            <use href="../assets/icons.svg#upload"></use>
+                        </svg>
+                        Add More
+                    </a>
+                </div>
+
+                <!-- Loading state -->
+                <div id="ms-loading" class="ms-loading animate-slide-up delay-1">
+                    <div class="ms-spinner"></div>
+                    <p>Loading syllabus structure…</p>
+                </div>
+
+                <!-- Error state -->
+                <div id="ms-error" class="ms-error hidden">
+                    <p id="ms-error-text">Something went wrong.</p>
+                    <button class="btn btn-outline" onclick="location.reload()">Retry</button>
+                </div>
+
+                <!-- Syllabus tree -->
+                <div id="ms-tree" class="ms-tree hidden"></div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../common/config.js"></script>
+    <script src="../common/api.js"></script>
+    <script src="../common/common.js"></script>
+    <script src="manual-syllabus.js"></script>
+</body>
+
+</html>

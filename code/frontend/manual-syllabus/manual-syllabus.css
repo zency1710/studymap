@@ -1,0 +1,273 @@
+/* =====================================================
+   Manual Syllabus View Page — manual-syllabus.css
+   ===================================================== */
+
+.ms-container {
+    max-width: 52rem;
+    margin: 0 auto;
+}
+
+/* Header */
+.ms-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.ms-header h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+.ms-subtitle {
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+}
+
+.ms-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+/* Loading spinner */
+.ms-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 4rem 0;
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+}
+
+.ms-spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error */
+.ms-error {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted-foreground);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Tree */
+.ms-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ── Unit card ────────────────────────────────────── */
+.ms-unit-card {
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--card);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease;
+}
+
+.ms-unit-card:hover {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.ms-unit-header {
+    padding: 0.9rem 1.25rem;
+    background: var(--primary-soft-10);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ms-unit-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.ms-unit-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* ── Topic block ─────────────────────────────────── */
+.ms-topic-block {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.ms-topic-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin-bottom: 0.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ms-topic-name::before {
+    content: 'Topic:';
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    padding: 0.15rem 0.45rem;
+    border-radius: 0.3rem;
+    background: var(--muted);
+    white-space: nowrap;
+}
+
+/* ── Subtopic rows ───────────────────────────────── */
+.ms-subtopics {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.ms-subtopic-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.6rem;
+    border: 1px solid var(--border);
+    background: var(--background);
+    gap: 1rem;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.ms-subtopic-row:hover {
+    background: var(--accent);
+    border-color: var(--primary);
+}
+
+.ms-subtopic-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.875rem;
+    color: var(--foreground);
+}
+
+.ms-subtopic-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+}
+
+.ms-subtopic-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Status badge on each subtopic */
+.ms-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.55rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ms-status-badge.pending {
+    background: hsla(38, 92%, 50%, 0.12);
+    color: var(--warning);
+}
+
+.ms-status-badge.verified {
+    background: hsla(142, 76%, 36%, 0.12);
+    color: var(--success);
+}
+
+/* Start Test button */
+.ms-start-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: inherit;
+    background: var(--gradient-primary);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.ms-start-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+.ms-start-btn:active {
+    transform: translateY(0);
+}
+
+/* Score chip shown after test */
+.ms-score-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--primary-soft-10);
+    color: var(--primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    gap: 0.25rem;
+}
+
+/* Empty state per topic */
+.ms-empty {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    padding: 0.5rem 0;
+    font-style: italic;
+}

@@ -156,6 +156,36 @@ const API = {
         return response.json();
     },
 
+    /**
+     * Save a manually entered syllabus.
+     * @param {string} syllabusName - Title of the syllabus
+     * @param {Array}  units        - Array of { name, topics: [{ name, subtopics: ['str',...] }] }
+     */
+    async saveManualSyllabus(syllabusName, units) {
+        const token = localStorage.getItem('studymap-token');
+        const response = await fetch(`${API_BASE_URL}/syllabus/manual`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ syllabusName, units })
+        });
+        return response.json();
+    },
+
+    /**
+     * Get the Unit → Topic → Subtopic structure for a manually-entered syllabus.
+     * @param {number} syllabusId
+     */
+    async getManualSyllabusStructure(syllabusId) {
+        const token = localStorage.getItem('studymap-token');
+        const response = await fetch(`${API_BASE_URL}/syllabus/manual/structure/${syllabusId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.json();
+    },
+
     // Tests
     async getQuestions(topicId) {
         const token = localStorage.getItem('studymap-token');
